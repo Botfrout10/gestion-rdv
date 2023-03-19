@@ -3,8 +3,9 @@
 
 #include"Personne.h"
 #include<string>
-//#include<vector>
-//#include"Rdv.h"
+#include<vector>
+
+class Rdv;
 
 using namespace std;
 
@@ -41,30 +42,32 @@ public:
         * @pre nom != tous les noms dans la liste
         */
         void ajouter(PersonneCH*& pers);
-        void ajouter(string& nom, const string& prenom, const string& tel,const string& email);
+        void ajouter(const string& nom, const string& prenom, const string& tel,const string& email);
         /**
          * @brief Supprimer une personne par son nom
          * @param[in] nom - Le nom de la personne a supprimer
+         * @param[in] list_rdv - tableau des rdvs de la personne a supprimer
+         * @pre la peronne ne doit pas avoir des rdvs
          */
-        void supprimer(string& nom);
-
+        void supprimer(const string& nom , const vector<Rdv>& list_rdv);
         /**
          * @brief modifier les propriete d'une personne par son nom
          * @param[in] nom_p - le nom de la personne a modifier
          * @param[in] nom - le nouveau nom de la personne a modifier
         */
-        void modifier(string& nom_p,string& nom,const string& prenom, const string& tel,const string& email);
+        void modifier(const string& nom_p,const string& nom,const string& prenom, const string& tel,const string& email);
 
         /**
          * @brief recherche une personne par le nom
          * @param nom - nom de la personne a rechercher
          * @return vrai si la personne existe et faux dans le cas contraire
          */
-        bool recherche(string& nom) const;
+        bool recherche(const string& nom) const;
 
         int pers_existe(PersonneCH*& pers) const;
-        int pers_existe(std::string& nom)const;
-        Personne& get_personne(std::string& nom) const;
+        int pers_existe(const string& nom)const;
+
+        Personne& get_personne(const string& nom) const;
 
 
 
@@ -77,9 +80,12 @@ public:
         //ecrire toutes les Personnes dans un ostream
         void ecrire(ostream& ost) const;
 
-        //il faut ajouter les surcharge d'operateur
         friend ostream& operator<<(ostream& ost,const PersonneLCH& p);
-        friend istream& operator<<(istream& ist,PersonneLCH& p);
+        friend istream& operator>>(istream& ist,PersonneLCH& p);
+
+
+        //fonction qui suprime une personne
+        void supprimer(const string& nom);
 
     private:
         PersonneCH *d_tete;
@@ -101,8 +107,6 @@ public:
         void supprimer_entete();
         void supprimer_milieu(PersonneCH*& crt);
         void supprimer_fin();
-    //  remet la liste en ordre apres la modification d'un nom et on passe en parametre la personne qu'on modifie
-//        void remettreEnOrdre(PersonneCH*& crt);
 };
 
 #endif // PERSONNELCH_H

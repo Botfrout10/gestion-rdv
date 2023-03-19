@@ -13,6 +13,8 @@ class Rdv
 {
     friend class RdvLCH;
 public:
+    Rdv();
+    Rdv(const Rdv& rdv);
     //On peut cree un rdv sans connaitre les personnes (&personnes={})
     Rdv(const std::string& nom,const Date& date_deb,const Date& date_fin,const std::vector<Personne>& personnes=std::vector<Personne>());
 
@@ -22,11 +24,13 @@ public:
     //parcourir la list des rdv et chercher les conflict entre les dates des fin des rdvs de la liste et la la date de debut de ce rdv et le sens contraire aussi
     void ajouter_pers(const Personne& personne,const std::vector<Rdv>& list_rdv);
     /*Pour modifier une attribut d'une classe friend il faut passe un objet de cette classe en parametre */
-    void supprimer_pers(Personne*& personne);
-    void supprimer_pers(std::string& nom);
+    void supprimer_pers(const Personne& personne);
+    void supprimer_pers(const std::string& nom);
 
     //return -1 si la pers n'existe pas et l'indice si la pers existe
-    int pers_exist(std::string& nom) const;
+    int pers_exist(const std::string& nom) const;
+
+    bool conflict(const Rdv& rdv) const ;
 
     //geters et seeters
     std::string nom() const;
@@ -41,8 +45,8 @@ public:
 
     bool lire(std::istream& ist);
     void ecrire(std::ostream& ost) const;
-    friend std::istream& operator>>(std::istream& ist,Rdv*& rdv);
-    friend std::ostream& operator<<(std::ostream& ost,Rdv*& rdv);
+    friend std::istream& operator>>(std::istream& ist,Rdv& rdv);
+    friend std::ostream& operator<<(std::ostream& ost,const Rdv& rdv);
 private:
     //le nom est l'identifiant
     std::string d_nom;

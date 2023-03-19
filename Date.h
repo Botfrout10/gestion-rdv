@@ -3,10 +3,20 @@
 
 
 #include<iostream>
+
+/**
+ * @class represente une date et elle est faite pour gerer les dates de debut et de fin des rdvs
+*/
 class Date
 {
 public:
-//    Date();
+    Date();
+    /**
+     * @brief constructeur d'une date qui prend les param
+     * @param [in] jour  - un entier positif qui represente le jour
+     * @param [in] mois  - un entier positif qui represente le mois
+     * @param [in] annee  - un entier positif qui represente l'annee
+    */
     Date(unsigned jour,unsigned mois, unsigned annee , unsigned heure, unsigned minute);
     //Date d{"01/02/2002 , 10:22"}
     Date(const std::string& date);
@@ -20,7 +30,15 @@ public:
     friend std::ostream& operator<<(std::ostream& ost,const Date& date);
     friend std::istream& operator>>(std::istream& ist,Date& date);
     //un rdv il ne peut pas commence s'il est deja un rdv en cours ?
-    bool estconflict(const Date& date) const;
+    bool egale(const Date& date) const;
+    friend bool operator ==(const Date& date1,const Date& date2);
+    friend bool operator !=(const Date& date1,const Date& date2);
+    friend bool operator >(const Date& date1,const Date& date2);
+    friend bool operator <(const Date& date1,const Date& date2);
+    friend bool operator <=(const Date& date1,const Date& date2);
+    friend bool operator >=(const Date& date1,const Date& date2);
+
+
 
 private:
     unsigned d_jour;

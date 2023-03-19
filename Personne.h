@@ -3,12 +3,14 @@
 #include<string>
 
 /**
- * @class
+ * @class represente une personne par son nom, prenom, tel, email
  * @pre le nom est l'identifient de la classe
  */
 class Personne
 {
 public:
+    Personne();
+    Personne(const Personne& pers);
     //tout les noms de la liste son majiscule ou miniscule
     Personne(const std::string& nom, const std::string& prenom, const std::string& tel, const std::string& email);
     //ces fonctions c'est juste pour permetre d'ajouter et supprimer des rdvs d'apres une personne
@@ -18,7 +20,7 @@ public:
     bool lire(std::istream& ist);
     void ecrire(std::ostream& ost) const;
     friend std::istream& operator>>(std::istream& ist,Personne& p);
-    friend std::ostream& operator<<(std::ostream& ost,Personne& p);
+    friend std::ostream& operator<<(std::ostream& ost,const Personne& p);
 
     //les seters et geters
     std::string nom() const;
@@ -33,6 +35,8 @@ public:
     //modifier les proprietes de la personne crt existe dans la liste ;mais on peut modifier juste les proprietes que l'on veut => set_pers(nom_du_param = valeur de param) ex: set_pers(crt,"mehdi",email="email@em.c");
     void set_pers(const std::string& nom,const std::string& prenom, const std::string& tel,const std::string& email);
     void set_pers(const Personne& pers);
+
+    Personne& get_personne();
 
 
 

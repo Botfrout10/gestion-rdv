@@ -7,7 +7,13 @@
 using namespace std;
 using namespace string_transforme;
 
-
+Personne::Personne() : d_nom{"N/A"}, d_prenom{"N/A"}, d_tel{"N/A"} , d_email{"N/A"}
+{}
+Personne::Personne(const Personne& pers): d_nom{pers.nom()},
+    d_prenom{pers.prenom()}, d_tel{pers.tel()} , d_email{pers.email()}
+{
+    en_maj(d_nom);
+}
 Personne::Personne(const string& nom, const string& prenom, const string& tel, const string& email) : d_nom{nom},
     d_prenom{prenom}, d_tel{tel} , d_email{email}
 {
@@ -65,13 +71,16 @@ void Personne::set_pers(const Personne& pers)
     set_tel(pers.tel());
 }
 
+Personne& Personne::get_personne()
+{
+    return *this;
+}
 
 //lire une personne d'apres un istream (nom prenom tel email)
 bool Personne::lire(istream& ist)
 {
-    char ch;
     string nom,prenom,tel,email;
-    ist>>nom>>ch>>prenom>>ch>>tel>>email;
+    ist>>nom>>prenom>>tel>>email;
     if(ist.good())
     {
         d_nom=nom;
@@ -90,9 +99,9 @@ istream& operator>>(istream& ist,Personne& p)
 
 void Personne::ecrire(ostream& ost) const
 {
-    ost<<d_nom<<' '<<d_prenom<<' '<<d_tel<<' '<<d_email<<' '<<endl;
+    ost<<d_nom<<' '<<d_prenom<<' '<<d_tel<<' '<<d_email<<' ';
 }
-ostream& operator<<(ostream& ost,Personne& p)
+ostream& operator<<(ostream& ost,const Personne& p)
 {
     p.ecrire(ost);
     return ost;

@@ -1,6 +1,7 @@
 #include"PersonneLCH.h"
 #include"Personne.h"
 #include"string_transforme.h"
+#include"Rdv.h"
 
 #include<iostream>
 #include<string>
@@ -77,35 +78,36 @@ void PersonneLCH::ajout_fin(const string& nom, const string& prenom, const strin
     d_fin=pers;
 }
 
-void PersonneLCH::ajouter(string& nom, const string& prenom, const string& tel,const string& email)
+void PersonneLCH::ajouter(const string& nom, const string& prenom, const string& tel,const string& email)
 {
-    en_maj(nom);
-    if(pers_existe(nom)>=0)
+    string nom_modif{nom};
+    en_maj(nom_modif);
+    if(pers_existe(nom_modif)>=0)
         return;
     if(vide())
     {
         //inserer vide
-        ajout_vide(nom,prenom,tel,email);
+        ajout_vide(nom_modif,prenom,tel,email);
     }
     else
     {
         PersonneCH *crt{d_tete};
-        while(crt->d_suiv!=nullptr && crt->d_personne.nom()<nom)
+        while(crt->d_suiv!=nullptr && crt->d_personne.nom()<nom_modif)
             crt=crt->d_suiv;
-        if(crt==d_tete && crt->d_personne.nom()>nom)
+        if(crt==d_tete && crt->d_personne.nom()>nom_modif)
         {
             //inserer a l'entete
-            ajout_entete(nom,prenom,tel,email);
+            ajout_entete(nom_modif,prenom,tel,email);
         }
-        else if(crt==d_fin && crt->d_personne.nom()<nom)
+        else if(crt==d_fin && crt->d_personne.nom()<nom_modif)
         {
             //inserer fin
-            ajout_fin(nom,prenom,tel,email);
+            ajout_fin(nom_modif,prenom,tel,email);
         }
         else
         {
             //inserer milieu
-            ajout_milieu(crt,nom,prenom,tel,email);
+            ajout_milieu(crt,nom_modif,prenom,tel,email);
         }
     }
     d_taille++;
@@ -195,47 +197,37 @@ void PersonneLCH::supprimer_fin()
     d_fin=d_fin->d_suiv;
 }
 
-void PersonneLCH::supprimer(string &nom)
+void PersonneLCH::supprimer(const string &nom)
 {
-    en_maj(nom);
+    string nom_modif{nom};
+    en_maj(nom_modif);
     if(vide())
         return;
     PersonneCH *crt{d_tete};
-    while(crt!=nullptr && crt->d_personne.nom()!=nom)
+    while(crt!=nullptr && crt->d_personne.nom()!=nom_modif)
         crt=crt->d_suiv;
     if(crt==nullptr)
         return;
     if(crt==d_tete)
     {
-        //supprimer en tete
-//        d_tete=d_tete->d_suiv;
-//        delete crt;
-//        d_tete->d_prec=nullptr;
-//        d_taille--;
         supprimer_entete();
 
     }
     if(crt==d_fin)
     {
-        //supprimer fin
-//        d_fin=d_fin->d_prec;
-//        delete crt;
-//        d_fin->d_suiv=nullptr;
-//        d_taille--;
         supprimer_fin();
     }
     supprimer_milieu(crt);
     delete crt;
     d_taille--;
-//    else
-//    {
-        //supprimer milieu
-//        crt->d_prec->d_suiv=crt->d_suiv;
-//        crt->d_suiv->d_prec=crt->d_prec;
-//        delete crt;
-//        d_taille--;
+}
 
-//    }
+void PersonneLCH::supprimer(const string& nom , const vector<Rdv>& list_rdv)
+{
+    if(list_rdv.size()==0)
+        supprimer(nom);
+    else
+        throw new exception{};
 }
 
 
@@ -252,12 +244,13 @@ int PersonneLCH::pers_existe(PersonneCH*& pers) const
         return -1;
     return i;
 }
-int PersonneLCH::pers_existe(std::string& nom) const
+int PersonneLCH::pers_existe(const std::string& nom) const
 {
-    en_maj(nom);
+    string nom_modif{nom};
+    en_maj(nom_modif);
     PersonneCH *crt{d_tete};
     int i{0};
-    while(crt!=nullptr && crt->d_personne.nom()!=nom)
+    while(crt!=nullptr && crt->d_personne.nom()!=nom_modif)
     {
         ++i;
         crt=crt->d_suiv;
@@ -266,130 +259,68 @@ int PersonneLCH::pers_existe(std::string& nom) const
         return -1;
     return i;
 }
-Personne& PersonneLCH::get_personne(std::string& nom)const
+Personne& PersonneLCH::get_personne(const std::string& nom)const
 {
-    en_maj(nom);
+    string nom_modif{nom};
+    en_maj(nom_modif);
     PersonneCH *crt{d_tete};
-    while(crt!=nullptr && nom!=crt->d_personne.nom())
+    while(crt!=nullptr && nom_modif!=crt->d_personne.nom())
         crt=crt->d_suiv;
     if(crt!=nullptr)
         return crt->d_personne;
 }
 
-//il manque remettreenordre()
-void PersonneLCH::modifier(string& nom_p,string& nom,const string& prenom, const string& tel,const string& email)
+void PersonneLCH::modifier(const string& nom_p,const string& nom,const string& prenom, const string& tel,const string& email)
 {
-    en_maj(nom);
-    en_maj(nom_p);
-    if(!vide() && !recherche(nom))
+    string nom_modif{nom};
+    string nomp_modif{nom_p};
+    en_maj(nom_modif);
+    en_maj(nomp_modif);
+    if(!vide() && !recherche(nom_modif))
     {
         PersonneCH *crt{d_tete};
-        while(crt!=nullptr && nom_p!=crt->d_personne.nom())
+        while(crt!=nullptr && nomp_modif!=crt->d_personne.nom())
             crt=crt->d_suiv;
         if(crt==nullptr)
             return;
         else
         {
-//            set_pers(crt,nom,prenom,tel,email);
-            crt->d_personne.set_pers(nom,prenom,tel,email);
-            if(nom_p!=nom)
+            crt->d_personne.set_pers(nom_modif,prenom,tel,email);
+            if(nomp_modif!=nom_modif)
             {
                 //remettre en ordre
-                string n{crt->d_personne.nom()};
-                supprimer(n);
-                PersonneCH *pers{new PersonneCH{nom,prenom,tel,email}};
+                supprimer(nom_modif);
+                PersonneCH *pers{new PersonneCH{nom_modif,prenom,tel,email}};
                 ajouter(pers);
             }
         }
     }
 }
-bool PersonneLCH::recherche(string& nom) const
+bool PersonneLCH::recherche(const string& nom) const
 {
-    en_maj(nom);
+    string nom_modif{nom};
+    en_maj(nom_modif);
     if(vide())
         return false;
     PersonneCH *crt{d_tete};
-    while(crt!=nullptr && nom!=crt->d_personne.nom())
+    while(crt!=nullptr && nom_modif!=crt->d_personne.nom())
         crt=crt->d_suiv;
     return crt;
 }
 
-
-//void PersonneLCH::swapNodes(PersonneCH* node1, PersonneCH* node2)
-//{
-//    // Si les deux nœuds sont les mêmes, il n'y a rien à faire
-//    if(node1 == node2) {
-//        return;
-//    }
-//
-//    // Vérifiez si l'un des nœuds est la tête de la liste et mettez à jour la tête si nécessaire
-//    if(node1 == d_tete) {
-//        d_tete = node2;
-//    }
-//    else if(node2 == d_tete) {
-//        d_tete = node1;
-//    }
-//
-//    // Échangez les liens prev et next des deux nœuds
-//    PersonneCH* temp = node1->d_prec;
-//    node1->d_prec = node2->d_prec;
-//    node2->d_prec = temp;
-//    temp = node1->d_suiv;
-//    node1->d_suiv = node2->d_suiv;
-//    node2->d_suiv = temp;
-//
-//    // Mettez à jour les liens prev et next des nœuds adjacents pour qu'ils pointent vers les nœuds échangés
-//    if(node1->d_prec != NULL) {
-//        node1->d_prec->d_suiv = node1;
-//    }
-//    if(node1->d_suiv != NULL) {
-//        node1->d_suiv->d_prec = node1;
-//    }
-//    if(node2->d_prec != NULL) {
-//        node2->d_prec->d_suiv = node2;
-//    }
-//    if(node2->d_suiv != NULL) {
-//        node2->d_suiv->d_prec = node2;
-//    }
-//}
-
-//error
-//void PersonneLCH::remettreEnOrdre(PersonneCH*& crt)
-//{
-//    supprimer(crt->d_personne.nom());
-//    PersonneCH *pers{new Personne(crt->d_personne.nom(),crt->d_personne.prenom(),crt->d_personne.tel(),crt->d_personne.email())};
-//    ajouter(pers);
-//}
-
 void PersonneLCH::lire(istream& ist)
 {
-    char ch;
-    string nom,prenom,tel,email;
+    Personne pers{};
     //remplacer eof par getline(ist,line(string))
-    while(!ist.eof())
+    while(ist>>pers)
     {
-        ist>>nom>>ch>>prenom>>ch>>tel>>email;
         if(ist.good())
         {
-            PersonneCH *p=new PersonneCH{nom,prenom,tel,email};
+            PersonneCH *p=new PersonneCH{pers};
             ajouter(p);
         }
-
     }
 }
-
-//void PersonneLCH::lire(istream& ist)
-//{
-//
-//    while(!ist.eof())
-//    {
-//          //il faut ajouter le constructeur par defaut
-//          //et la methode ajouter(PersonneCH*& pers)
-//        PersonneCH *pers=new PersonneCH{};
-//        pers.lire(ist);
-//        ajouter(pers);
-//    }
-//}
 
 void PersonneLCH::ecrire(ostream& ost) const
 {
@@ -398,7 +329,6 @@ void PersonneLCH::ecrire(ostream& ost) const
         cout<<"vide";
         return;
     }
-
     for(PersonneCH *crt{d_tete}; crt!=nullptr ;crt=crt->d_suiv)
     {
         crt->d_personne.ecrire(ost);
@@ -411,7 +341,7 @@ ostream& operator<<(ostream& ost,const PersonneLCH& p)
     p.ecrire(ost);
     return ost;
 }
-istream& operator<<(istream& ist,PersonneLCH& p)
+istream& operator>>(istream& ist,PersonneLCH& p)
 {
     p.lire(ist);
     return ist;

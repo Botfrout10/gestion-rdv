@@ -114,21 +114,20 @@ bool Rdv::conflict(const Rdv& rdv) const
             (rdv.date_fin()>d_date_deb && rdv.date_fin()<d_date_fin));
 }
 
-//nom_rdv date_deb date_fin nbr_pers() [ pers1 ] [ pers2 ]...
+//nom_rdv date_deb date_fin [ pers1 ] [ pers2 ]...
 bool Rdv::lire(std::istream& ist)
 {
     std::string nom;
     Date d_d,d_f;
     std::vector<Personne> personnes;
+    personnes.reserve(MAX_PERS);
     char ch;
-    int i=0,nb;
-    ist>>nom>>d_d>>d_f>>nb;
-    personnes.reserve(nb);
-    Personne p{};
-    while( i<nb && ist>>ch>>p>>ch)
+    int i{0};
+    ist>>nom>>d_d>>d_f;
+    Personne personne{};
+    while(ist>>ch>>personne>>ch)
     {
-        personnes.push_back(p);
-        ++i;
+        personnes.push_back(personne);
     }
     if(ist.good())
     {
@@ -140,18 +139,15 @@ bool Rdv::lire(std::istream& ist)
     }
     return false;
 }
-//nom date_deb date_fin nbr_pers() [ personnes[0] ] [ personnes[1] ]...
+//nom date_deb date_fin [ personnes[0] ] [ personnes[1] ]...
 void Rdv::ecrire(ostream& ost) const
 {
-    ost<<d_nom<<' '<<d_date_deb<<d_date_fin<<' '<<nbr_pers()<<' ';
+    ost<<d_nom<<' '<<d_date_deb<<d_date_fin;
     if(nbr_pers()>0)
-    {
         for(unsigned i{0} ; i<d_personnes.size() ; ++i)
-        {
-            ost<<"[ "<<d_personnes[i]<<" ] ";
-        }
-
-    }
+            {
+                ost<<"[ "<<d_personnes[i]<<" ] ";
+            }
 }
 
 std::istream& operator>>(std::istream& ist,Rdv& rdv)
