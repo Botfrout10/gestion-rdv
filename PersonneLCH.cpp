@@ -78,16 +78,17 @@ void PersonneLCH::ajout_fin(const string& nom, const string& prenom, const strin
     d_fin=pers;
 }
 
-void PersonneLCH::ajouter(const string& nom, const string& prenom, const string& tel,const string& email)
+bool PersonneLCH::ajouter(const string& nom, const string& prenom, const string& tel,const string& email)
 {
     string nom_modif{nom};
     en_maj(nom_modif);
     if(pers_existe(nom_modif)>=0)
-        return;
+        return false;
     if(vide())
     {
         //inserer vide
         ajout_vide(nom_modif,prenom,tel,email);
+        return true;
     }
     else
     {
@@ -111,6 +112,7 @@ void PersonneLCH::ajouter(const string& nom, const string& prenom, const string&
         }
     }
     d_taille++;
+    return true;
 }
 
 
@@ -266,9 +268,24 @@ Personne& PersonneLCH::get_personne(const std::string& nom)const
     PersonneCH *crt{d_tete};
     while(crt!=nullptr && nom_modif!=crt->d_personne.nom())
         crt=crt->d_suiv;
-    if(crt!=nullptr)
-        return crt->d_personne;
+    if(crt==nullptr)
+        throw std::runtime_error("Il n'existe pas une personne avec tel nom");
+    return crt->d_personne;
 }
+Personne& PersonneLCH::get_personne(int idx) const
+{
+    PersonneCH *crt{d_tete};
+    int i{0};
+    while(crt!=nullptr && i<idx)
+    {
+        crt=crt->d_suiv;
+        ++i;
+    }
+    if(crt==nullptr)
+        throw std::runtime_error("Il n'existe pas une personne avec tel indice");
+    return crt->d_personne;
+}
+
 
 void PersonneLCH::modifier(const string& nom_p,const string& nom,const string& prenom, const string& tel,const string& email)
 {

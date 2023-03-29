@@ -42,7 +42,7 @@ public:
         * @pre nom != tous les noms dans la liste
         */
         void ajouter(PersonneCH*& pers);
-        void ajouter(const string& nom, const string& prenom, const string& tel,const string& email);
+        bool ajouter(const string& nom, const string& prenom, const string& tel,const string& email);
         /**
          * @brief Supprimer une personne par son nom
          * @param[in] nom - Le nom de la personne a supprimer
@@ -67,7 +67,9 @@ public:
         int pers_existe(PersonneCH*& pers) const;
         int pers_existe(const string& nom)const;
 
+        //ces 2 methodes throw a run time error il faut ajouter un handler
         Personne& get_personne(const string& nom) const;
+        Personne& get_personne(int idx) const;
 
 
 

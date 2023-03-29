@@ -15,6 +15,8 @@ class RdvCH
 {
 public:
     RdvCH(const Rdv& rdv);
+    //(c'est mieux) c'est obliger d'emetter un signal pour que les personnes ajouter au rdv soit ajouter a la PersonneLCH correspondante
+    //ou attribuer le rdv a une PersonneLCH pour que l'on ajoutrai les personnes dedans
     RdvCH(const std::string& nom,const Date& date_deb,const Date& date_fin,const std::vector<Personne>& personnes=std::vector<Personne>());
 
     Rdv d_rdv;
@@ -36,7 +38,10 @@ public:
     int taille() const;
     bool vide() const;
 
+    //ces 2 methodes throw a run time error il faut ajouter un handler
+    //@pre on suppose que l'indice existe
     Rdv& rdv(int idx) const;
+    //on suppose que le nom existe
     Rdv& rdv(const std::string& nom) const;
 
     //Afficher tous les rendez-vous pour une date donnée par l’utilisateur.

@@ -330,13 +330,15 @@ Rdv& RdvLCH::rdv(int idx) const
 {
     RdvCH*crt{d_tete};
     int i{0};
-    while(d_tete!=nullptr && i<idx)
+    while(crt!=nullptr && i<idx)
     {
         crt=crt->d_suiv;
         ++i;
     }
-    if(crt!=nullptr)
-        return crt->d_rdv;
+    if(crt==nullptr)
+        throw std::runtime_error("Il n'existe pas un rdv avec tel indice");
+    return crt->d_rdv;
+
 }
 
 Rdv& RdvLCH::rdv(const std::string& nom) const
@@ -344,12 +346,13 @@ Rdv& RdvLCH::rdv(const std::string& nom) const
     string nom_modif{nom};
     en_maj(nom_modif);
     RdvCH*crt{d_tete};
-    while(d_tete!=nullptr && crt->d_rdv.nom()!=nom_modif)
+    while(crt!=nullptr && crt->d_rdv.nom()!=nom_modif)
     {
         crt=crt->d_suiv;
     }
-     if(crt!=nullptr)
-        return crt->d_rdv;
+    if(crt==nullptr)
+        throw std::runtime_error("Il n'existe pas un rdv avec tel nom");
+    return crt->d_rdv;
 }
 
 int RdvLCH::rechercher(const std::string& nom) const

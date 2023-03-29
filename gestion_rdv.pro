@@ -14,8 +14,9 @@ SOURCES += \
     PersonneLCH.cpp \
     Rdv.cpp \
     RdvLCH.cpp \
-    main.cpp \
     fenetrerdv.cpp \
+    main.cpp \
+    personnevues.cpp \
     string_transforme.cpp
 
 HEADERS += \
@@ -25,6 +26,7 @@ HEADERS += \
     Rdv.h \
     RdvLCH.h \
     fenetrerdv.h \
+    personnevues.h \
     string_transforme.h
 
 # Default rules for deployment.
