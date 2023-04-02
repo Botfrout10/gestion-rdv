@@ -9,8 +9,9 @@ int main(int argc, char *argv[])
     pers.ajouter("Ottmani","Mehdi","+09876543","mehdi@gmail.com");
     pers.ajouter("Salem","Mouhssin","+09876543","mehdi@gmail.com");
     pers.ajouter("Lbaldi","Jlafet","+09876543","mehdi@gmail.com");
+    RdvLCH rdvs;
 
-    fenetreRdv w{pers,{}};
+    fenetreRDV w{pers,rdvs};
     w.show();
     return a.exec();
 }

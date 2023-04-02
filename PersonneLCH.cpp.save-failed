@@ -88,7 +88,6 @@ bool PersonneLCH::ajouter(const string& nom, const string& prenom, const string&
     {
         //inserer vide
         ajout_vide(nom_modif,prenom,tel,email);
-        ++d_taille;
         return true;
     }
     else
@@ -200,17 +199,17 @@ void PersonneLCH::supprimer_fin()
     d_fin=d_fin->d_suiv;
 }
 
-bool PersonneLCH::supprimer(const string &nom)
+void PersonneLCH::supprimer(const string &nom)
 {
     string nom_modif{nom};
     en_maj(nom_modif);
     if(vide())
-        return false;
+        return;
     PersonneCH *crt{d_tete};
     while(crt!=nullptr && crt->d_personne.nom()!=nom_modif)
         crt=crt->d_suiv;
     if(crt==nullptr)
-        return false;
+        return;
     if(crt==d_tete)
     {
         supprimer_entete();
@@ -223,17 +222,14 @@ bool PersonneLCH::supprimer(const string &nom)
     supprimer_milieu(crt);
     delete crt;
     d_taille--;
-    return true;
 }
 
-bool PersonneLCH::supprimer(const string& nom , const vector<Rdv>& list_rdv)
+void PersonneLCH::supprimer(const string& nom , const vector<Rdv>& list_rdv)
 {
     if(list_rdv.size()==0)
-    {
-        return supprimer(nom);
-    }
+        supprimer(nom);
     else
-        return false;
+        throw new exception{};
 }
 
 
@@ -315,45 +311,31 @@ Personne PersonneLCH::personne(int idx) const
 }
 
 
-bool PersonneLCH::modifier(const string& nom_p,const string& nom,const string& prenom, const string& tel,const string& email)
+void PersonneLCH::modifier(const string& nom_p,const string& nom,const string& prenom, const string& tel,const string& email)
 {
     string nom_modif{nom};
     string nomp_modif{nom_p};
     en_maj(nom_modif);
     en_maj(nomp_modif);
-    if(!vide())
+    if(!vide() && !recherche(nom_modif))
     {
         PersonneCH *crt{d_tete};
         while(crt!=nullptr && nomp_modif!=crt->d_personne.nom())
             crt=crt->d_suiv;
         if(crt==nullptr)
-            return false;
+            return;
         else
         {
-            //modifier la personne sans contrainte car:
-            //le nom reste le meme on change pas la position
-            //et on regarde pas si ce nom existe
-            if(nomp_modif==nom_modif)
-                crt->d_personne.set_pers(nom_modif,prenom,tel,email);
-            //il faut gerer les cas
-            else
+            crt->d_personne.set_pers(nom_modif,prenom,tel,email);
+            if(nomp_modif!=nom_modif)
             {
-                //le nouveau nom existe
-                if(recherche(nom_modif))
-                    return false;
-                //le nv nom != nomp donc il faut modifier la pos
-                else
-                {
-                    //remettre en ordre
-                    supprimer(nom_modif);
-                    PersonneCH *pers{new PersonneCH{nom_modif,prenom,tel,email}};
-                    ajouter(pers);
-                }
+                //remettre en ordre
+                supprimer(nom_modif);
+                PersonneCH *pers{new PersonneCH{nom_modif,prenom,tel,email}};
+                ajouter(pers);
             }
-            return true;
         }
     }
-    return false;
 }
 bool PersonneLCH::recherche(const string& nom) const
 {

@@ -40,8 +40,10 @@ public:
         * @param[in] nom - le nom de la nouvelle personne
         * ...
         * @pre nom != tous les noms dans la liste
+        * @return true si la personne ajouter et false si la personne existe
         */
         void ajouter(PersonneCH*& pers);
+
         bool ajouter(const string& nom, const string& prenom, const string& tel,const string& email);
         /**
          * @brief Supprimer une personne par son nom
@@ -49,13 +51,13 @@ public:
          * @param[in] list_rdv - tableau des rdvs de la personne a supprimer
          * @pre la peronne ne doit pas avoir des rdvs
          */
-        void supprimer(const string& nom , const vector<Rdv>& list_rdv);
+        bool supprimer(const string& nom , const vector<Rdv>& list_rdv);
         /**
          * @brief modifier les propriete d'une personne par son nom
          * @param[in] nom_p - le nom de la personne a modifier
          * @param[in] nom - le nouveau nom de la personne a modifier
         */
-        void modifier(const string& nom_p,const string& nom,const string& prenom, const string& tel,const string& email);
+        bool modifier(const string& nom_p,const string& nom,const string& prenom, const string& tel,const string& email);
 
         /**
          * @brief recherche une personne par le nom
@@ -70,6 +72,9 @@ public:
         //ces 2 methodes throw a run time error il faut ajouter un handler
         Personne& get_personne(const string& nom) const;
         Personne& get_personne(int idx) const;
+
+        Personne personne(const string& nom) const;
+        Personne personne(int idx) const;
 
 
 
@@ -86,8 +91,6 @@ public:
         friend istream& operator>>(istream& ist,PersonneLCH& p);
 
 
-        //fonction qui suprime une personne
-        void supprimer(const string& nom);
 
     private:
         PersonneCH *d_tete;
@@ -109,6 +112,10 @@ public:
         void supprimer_entete();
         void supprimer_milieu(PersonneCH*& crt);
         void supprimer_fin();
+
+        //fonction qui suprime une personne
+        bool supprimer(const string& nom);
 };
+
 
 #endif // PERSONNELCH_H

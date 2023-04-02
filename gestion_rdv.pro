@@ -16,8 +16,8 @@ SOURCES += \
     RdvLCH.cpp \
     fenetrerdv.cpp \
     main.cpp \
-    personnevues.cpp \
-    string_transforme.cpp
+    string_transforme.cpp \
+    validation.cpp
 
 HEADERS += \
     Date.h \
@@ -26,8 +26,8 @@ HEADERS += \
     Rdv.h \
     RdvLCH.h \
     fenetrerdv.h \
-    personnevues.h \
-    string_transforme.h
+    string_transforme.h \
+    validation.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
