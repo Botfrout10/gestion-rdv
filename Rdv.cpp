@@ -119,19 +119,20 @@ bool Rdv::lire(std::istream& ist)
 {
     std::string nom;
     Date d_d,d_f;
-    std::vector<Personne> personnes;
     char ch;
     int i=0,nb;
     ist>>nom>>d_d>>d_f>>nb;
-    personnes.reserve(nb);
-    Personne p{};
-    while( i<nb && ist>>ch>>p>>ch)
-    {
-        personnes.push_back(p);
-        ++i;
-    }
+
     if(ist.good())
     {
+        std::vector<Personne> personnes;
+        personnes.reserve(nb);
+        Personne p{};
+        while( i<nb && ist>>ch>>p>>ch)
+        {
+            personnes.push_back(p);
+            ++i;
+        }
         d_nom=nom;
         d_date_deb=d_d;
         d_date_fin=d_f;

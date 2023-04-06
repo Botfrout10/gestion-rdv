@@ -6,6 +6,8 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QTableWidget>
+#include <QDateEdit>
+#include <QComboBox>
 
 
 #include <QMainWindow>
@@ -21,6 +23,7 @@ private:
     RdvLCH d_rdvs;
 
 
+    //vue Personne:
     //Vue ajouter Personne
     QLabel  *d_nomErrorAjtPers,
             *d_prenomErrorAjtPers,
@@ -53,7 +56,17 @@ private:
     QLineEdit *d_nomTextSuppPers;
     QLabel *d_nomErrSuppPers;
     //vue Afficher Personne
+/********************************/
+    //vue Rdv:
+    //Vue ajouter Rdv
+    QLabel  *d_nomErrorAjtRdv,
+            *d_dateDebErrorAjtRdv,
+            *d_dateFinErrorAjtRdv;
 
+    QLineEdit *d_nomTextAjtRdv;
+    QDateEdit *d_dateDebAjtRdv,
+              *d_dateFinAjtRdv;
+    QComboBox *d_affichePersAjtRdv;
 
 
     //le menuBar
@@ -65,7 +78,9 @@ private:
     void vuePersModifier();
     void vuePersSupprimer();
     void vuePersAfficher();
-
+    //vue Rdv
+    void vueRdvAjouter();
+    void afficherPersSelectionAjtRdv();
 public slots:
     //slots Personne
     void onActionAjouterPers();
@@ -82,7 +97,14 @@ public slots:
 
     void onActionAfficherPers();
 
+
+    //slots Rdv
+    void onActionAjouterRdv();
+    void onAjouterPersRdv();
+
+
     void onAppClose();
+
 };
 
 #endif // FENETRERDV_H

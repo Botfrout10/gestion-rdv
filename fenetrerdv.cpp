@@ -112,7 +112,7 @@ fenetreRDV::fenetreRDV(const PersonneLCH& pers, const RdvLCH& rdv, QWidget *pare
 //"                                     font-weight: bold;"
 //"}"
                                  );
-    this->setStyleSheet(style);
+//    this->setStyleSheet(style);
     vuePersAfficher();
     connect(this,&QMainWindow::destroyed,this,&fenetreRDV::onAppClose);
 }
@@ -148,6 +148,8 @@ void fenetreRDV::creeMenu()
     auto actSupprimerRdv=new QAction{tr("supprimer")};
     auto actRechercherRdv=new QAction{tr("Rechercher")};
     menuRdv->addActions({actAjouterRdv,actModifeirRdv,actSupprimerRdv,actRechercherRdv});
+    connect(actAjouterRdv,&QAction::triggered,
+            this,&fenetreRDV::onActionAjouterRdv);
 }
 
 //Ajouter Personne
@@ -520,8 +522,6 @@ void fenetreRDV::onSupprimerPers()
 //afficher Personne
 void fenetreRDV::vuePersAfficher()
 {
-    this->setMinimumWidth(450);
-
     auto central = new QWidget{};
 
     auto mainLayout = new QVBoxLayout{};
@@ -537,6 +537,10 @@ void fenetreRDV::vuePersAfficher()
         afficheTable->setItem(i,1,new QTableWidgetItem{QString::fromStdString(d_personnes.get_personne(i).prenom())});
         afficheTable->setItem(i,2,new QTableWidgetItem{QString::fromStdString(d_personnes.get_personne(i).tel())});
         afficheTable->setItem(i,3,new QTableWidgetItem{QString::fromStdString(d_personnes.get_personne(i).email())});
+        afficheTable->item(i,0)->setFlags(Qt::NoItemFlags);
+        afficheTable->item(i,1)->setFlags(Qt::NoItemFlags);
+        afficheTable->item(i,2)->setFlags(Qt::NoItemFlags);
+        afficheTable->item(i,3)->setFlags(Qt::NoItemFlags);
     }
     mainLayout->addWidget(afficheTable);
 
@@ -554,4 +558,66 @@ void fenetreRDV::onAppClose()
              foutRdv{"../gestion-rdv/stockage/Rdv.txt"};
     foutPers<<d_personnes;
     foutRdv<<d_rdvs;
+}
+
+void fenetreRDV::vueRdvAjouter()
+{
+    auto central = new QWidget{};
+
+    auto mainLayout = new QGridLayout{};
+    mainLayout->addWidget(new QLabel{tr("Ajouter Rendez-vous")},0,1,Qt::AlignCenter);
+    //nom
+    mainLayout->addWidget(new QLabel{tr("Nom*")},1,0,Qt::AlignLeft);
+    d_nomTextAjtRdv = new QLineEdit{};
+    mainLayout->addWidget(d_nomTextAjtRdv,2,0,Qt::AlignLeft);
+    d_nomErrorAjtRdv = new QLabel{"         "};
+    d_nomErrorAjtRdv->setStyleSheet("color : red");
+    mainLayout->addWidget(d_nomErrorAjtRdv,3,0);
+    //date deb
+    mainLayout->addWidget(new QLabel{tr("Date debut:")},4,0,Qt::AlignLeft);
+    d_dateDebAjtRdv = new QDateEdit{};
+    mainLayout->addWidget(d_dateDebAjtRdv,5,0,Qt::AlignLeft);
+    d_dateDebErrorAjtRdv = new QLabel{"                 "};
+    d_dateDebErrorAjtRdv->setStyleSheet("color : red");
+    mainLayout->addWidget(d_dateDebErrorAjtRdv,6,0);
+
+//    date fin
+    mainLayout->addWidget(new QLabel{tr("Date debut:")},7,0,Qt::AlignLeft);
+    d_dateFinAjtRdv = new QDateEdit{};
+    mainLayout->addWidget(d_dateFinAjtRdv,8,0,Qt::AlignLeft);
+    d_dateFinErrorAjtRdv = new QLabel{"                 "};
+    d_dateFinErrorAjtRdv->setStyleSheet("color : red");
+    mainLayout->addWidget(d_dateFinErrorAjtRdv,9,0);
+
+    //Personnes
+    mainLayout->addWidget(new QLabel{tr("Personnes:")},10,0,Qt::AlignLeft);
+    d_affichePersAjtRdv = new QComboBox{};
+    mainLayout->addWidget(d_affichePersAjtRdv,11,0,Qt::AlignLeft);
+    auto btnAjouterPers=new QPushButton{tr("Ajouter")};
+    mainLayout->addWidget(btnAjouterPers,11,1,Qt::AlignLeft);
+    connect(btnAjouterPers,&QPushButton::clicked,
+            this,&fenetreRDV::onAjouterPersRdv);
+
+
+    central->setLayout(mainLayout);
+
+    setCentralWidget(central);
+}
+
+void fenetreRDV::afficherPersSelectionAjtRdv()
+{
+    for(int i=0 ; i<d_personnes.taille() ; ++i)
+    {
+        //c'est mieux d'ajouter un iterateur pour la liste des personnes
+        d_affichePersAjtRdv->addItem(QString::fromStdString(d_personnes.get_personne(i).nom()));
+    }
+}
+void fenetreRDV::onActionAjouterRdv()
+{
+    vueRdvAjouter();
+    afficherPersSelectionAjtRdv();
+}
+void fenetreRDV::onAjouterPersRdv()
+{
+    d_affichePersAjtRdv->removeItem(0);
 }
