@@ -5,7 +5,6 @@
 
 using namespace std;
 
-//il faut mettre se naùespace dans un fichier isole
 namespace string_transforme
 {
     //Rendre une string upper

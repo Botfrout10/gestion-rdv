@@ -38,7 +38,7 @@ bool Rdv::pers_ajoutable(const std::vector<Rdv>& list_rdv) const
     //si il y aura des conflict return false
     unsigned i{0};
 //    cout<<d_date_deb<<list_rdv[i].date_fin();
-    while(i<list_rdv.size() && !conflict(list_rdv[i])  && d_nom != list_rdv[i].nom())
+    while(i<list_rdv.size() && !conflict(list_rdv[i]) && d_nom != list_rdv[i].nom())
     {
         //date de deb de nouveau rdv => d_date_deb
         //date de fin des rdvs de la pers => rdv.d_date_fin
@@ -48,7 +48,7 @@ bool Rdv::pers_ajoutable(const std::vector<Rdv>& list_rdv) const
 }
 
 //list_rdv d'une personne
-void Rdv::ajouter_pers(const Personne& personne,const vector<Rdv>& list_rdv)
+bool Rdv::ajouter_pers(const Personne& personne,const vector<Rdv>& list_rdv)
 {
     std::string nom_pers{personne.nom()};
     if(pers_exist(nom_pers)==-1 &&
@@ -56,35 +56,37 @@ void Rdv::ajouter_pers(const Personne& personne,const vector<Rdv>& list_rdv)
     {
         //ajouter la personne dans la table des personnes qui assitent a ce rdv
         d_personnes.push_back(personne);
+        return true;
     }
+    return false;
 }
 
-void Rdv::supprimer_pers(const Personne& personne)
+bool Rdv::supprimer_pers(const Personne& personne)
 {
     if(d_personnes.size()==0)
-        return;
+        return false;
     int i{pers_exist(personne.nom())};
     if(i>=0)
     {
         //j'ai utilise cela "d_personnes.begin()" car la fonction prend en parametre un iterator
         //supprimer la personne du rdv
         d_personnes.erase(d_personnes.begin()+i);
-
+        return true;
     }
 }
-void Rdv::supprimer_pers(const std::string& nom)
+bool Rdv::supprimer_pers(const std::string& nom)
 {
     std::string nom_modif{nom};
     en_maj(nom_modif);
     if(d_personnes.size()==0)
-        return;
+        return false;
     int i{pers_exist(nom_modif)};
     if(i>=0)
     {
         //j'ai utilise cela "d_personnes.begin()" car la fonction prend en parametre un iterator
         //supprimer la personne du rdv
         d_personnes.erase(d_personnes.begin()+i);
-
+        return true;
     }
 }
 
@@ -110,8 +112,22 @@ bool Rdv::conflict(const Rdv& rdv) const
     //                  |-------------|
     //cas3:
     //            |--------|
-    return ((rdv.date_deb()>d_date_deb && rdv.date_deb()<d_date_fin) ||
-            (rdv.date_fin()>d_date_deb && rdv.date_fin()<d_date_fin));
+//    return ((rdv.date_deb()<d_date_deb && rdv.date_fin()>d_date_deb) ||
+//            (rdv.date_deb()<d_date_fin && rdv.date_fin()>d_date_fin) ||
+//            (rdv.date_deb()>d_date_deb && rdv.date_fin()<d_date_fin));
+    if (d_date_deb.annee() == rdv.date_fin().annee() && d_date_deb.mois() == rdv.date_fin().mois() && d_date_deb.jour() == rdv.date_fin().jour()) {
+           if (d_date_fin.heure() < rdv.date_deb().heure() || rdv.date_fin().heure() < d_date_deb.heure()) {
+               return false;
+           }
+           if (d_date_fin.heure() == rdv.date_deb().heure() && d_date_fin.minute() <= rdv.date_deb().minute()) {
+               return false;
+           }
+           if (d_date_deb.heure() == rdv.date_fin().heure() && d_date_deb.minute() >= rdv.date_fin().minute()) {
+               return false;
+           }
+           return true;
+       }
+       return false;
 }
 
 //nom_rdv date_deb date_fin nbr_pers() [ pers1 ] [ pers2 ]...

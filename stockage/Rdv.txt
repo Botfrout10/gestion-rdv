@@ -1,4 +1,4 @@
-RDV1 1/1/2023,10:0 1/1/2023,11:0  2 [ MEZ jeprfp +08378756 mjzrfihn@zfnd.vom  ] [ MEHDI jeprfp +08378756 mjzrfihn@zfnd.vom  ] 
-RDV2 1/1/2023,10:10 1/1/2023,14:0  0 
-RDV4 1/1/2023,13:0 1/1/2023,14:0  0 
-RDV5 1/1/2023,10:0 1/1/2023,11:0  0 
+AIFJOIH 9/4/2023,18:26 9/4/2023,19:26  0 
+RDVLZDAADZ 9/4/2023,18:14 9/4/2023,19:14  0 
+RDVLZDAOAZ 9/4/2023,18:7 9/4/2023,19:7  1 [ OUSSAMA jeprfp +08378756 mjzrfihn@zfnd.com  ] 
+RDVPOURSMAT 9/4/2023,17:43 9/4/2023,18:43  4 [ FRIDA jeprfp +08378756 mjzrfihn@zfnd.com  ] [ LAGMI kmaed +0989658676 mehdi@glad.de  ] [ OTTMANI Mehdi +09876543 mehdi@gmail.com  ] [ OTTMZN mejeijf +0987652322 mejf@euh.com  ] 

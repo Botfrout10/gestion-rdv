@@ -24,9 +24,6 @@ bool validation::isTel(const std::string& tel) const
 
 bool validation::estRdv(const Date& date_deb,const Date& date_fin) const
 {
-    bool res{true};
-    if(date_deb.jour() != date_fin.jour() || date_deb.mois() != date_fin.mois() || date_deb.annee() != date_fin.annee() )
-        res=false;
-//    res=date_deb.estconflict(date_fin);
-    return res;
+    int difHeure{date_fin.heure()-date_deb.heure()};
+    return(date_deb.jour() == date_fin.jour() && date_deb.annee() == date_fin.annee() && date_deb.mois() == date_fin.mois() && difHeure<=5 && difHeure>0);
 }

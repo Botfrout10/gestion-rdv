@@ -69,7 +69,7 @@ public:
         int pers_existe(PersonneCH*& pers) const;
         int pers_existe(const string& nom)const;
 
-        //ces 2 methodes throw a run time error il faut ajouter un handler
+        //ces 2 methodes throw a run time error
         Personne& get_personne(const string& nom) const;
         Personne& get_personne(int idx) const;
 

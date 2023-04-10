@@ -44,6 +44,11 @@ unsigned Date::minute() const
 {
     return d_minute;
 }
+std::string Date::dateStr() const
+{
+    std::string res{d_jour+'/'+d_mois+'/'+d_annee+'/'+d_heure+'/'+d_minute+'/'};
+    return res;
+}
 void Date::ecrire(std::ostream& ost) const
 {
     ost<<d_jour<<'/'<<d_mois<<'/'<<d_annee<<','<<d_heure<<':'<<d_minute<<' ';

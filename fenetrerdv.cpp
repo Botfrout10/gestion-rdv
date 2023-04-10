@@ -1,7 +1,6 @@
 #include "fenetrerdv.h"
 #include <QBoxLayout>
 #include <QMenuBar>
-#include <QPushButton>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QString>
@@ -144,12 +143,22 @@ void fenetreRDV::creeMenu()
     //creation de menu Rdv
     auto menuRdv=menuBar()->addMenu(tr("&Rdv"));
     auto actAjouterRdv=new QAction{tr("Ajouter")};
-    auto actModifeirRdv=new QAction{tr("Modifier")};
+    auto actModifierRdv=new QAction{tr("Modifier")};
     auto actSupprimerRdv=new QAction{tr("supprimer")};
-    auto actRechercherRdv=new QAction{tr("Rechercher")};
-    menuRdv->addActions({actAjouterRdv,actModifeirRdv,actSupprimerRdv,actRechercherRdv});
+    menuRdv->addActions({actAjouterRdv,actModifierRdv,actSupprimerRdv});
+
+    auto menuRechRdv= new QMenu{tr("Rechercher")};
+    auto actRechercherRdvDate=new QAction{tr("Par date")};
+    auto actRechercherRdvNom=new QAction{tr("Par Nom")};
+    menuRechRdv->addActions({actRechercherRdvDate,actRechercherRdvNom});
+    menuRdv->addMenu(menuRechRdv);
     connect(actAjouterRdv,&QAction::triggered,
             this,&fenetreRDV::onActionAjouterRdv);
+    connect(actModifierRdv,&QAction::triggered,this,&fenetreRDV::onActionModifierRdv);
+    connect(actSupprimerRdv,&QAction::triggered,this,&fenetreRDV::onActionSupprimerRdv);
+    connect(actRechercherRdvDate,&QAction::triggered,this,&fenetreRDV::onActionRechercherRdvDate);
+    connect(actRechercherRdvNom,&QAction::triggered,this,&fenetreRDV::onActionRechercherRdvNom);
+
 }
 
 //Ajouter Personne
@@ -570,33 +579,46 @@ void fenetreRDV::vueRdvAjouter()
     mainLayout->addWidget(new QLabel{tr("Nom*")},1,0,Qt::AlignLeft);
     d_nomTextAjtRdv = new QLineEdit{};
     mainLayout->addWidget(d_nomTextAjtRdv,2,0,Qt::AlignLeft);
-    d_nomErrorAjtRdv = new QLabel{"         "};
+    d_nomErrorAjtRdv = new QLabel{"       "};
     d_nomErrorAjtRdv->setStyleSheet("color : red");
-    mainLayout->addWidget(d_nomErrorAjtRdv,3,0);
+    mainLayout->addWidget(d_nomErrorAjtRdv,3,0,Qt::AlignLeft);
+
     //date deb
     mainLayout->addWidget(new QLabel{tr("Date debut:")},4,0,Qt::AlignLeft);
-    d_dateDebAjtRdv = new QDateEdit{};
+    d_dateDebAjtRdv = new QDateTimeEdit{};
+    d_dateDebAjtRdv->setDisplayFormat("dd/MM/yyyy/hh/mm");
+    d_dateDebAjtRdv->setDateTime(QDateTime::currentDateTime());
     mainLayout->addWidget(d_dateDebAjtRdv,5,0,Qt::AlignLeft);
-    d_dateDebErrorAjtRdv = new QLabel{"                 "};
-    d_dateDebErrorAjtRdv->setStyleSheet("color : red");
-    mainLayout->addWidget(d_dateDebErrorAjtRdv,6,0);
+
+
 
 //    date fin
-    mainLayout->addWidget(new QLabel{tr("Date debut:")},7,0,Qt::AlignLeft);
-    d_dateFinAjtRdv = new QDateEdit{};
-    mainLayout->addWidget(d_dateFinAjtRdv,8,0,Qt::AlignLeft);
+    mainLayout->addWidget(new QLabel{tr("Date fin:")},6,0,Qt::AlignLeft);
+    d_dateFinAjtRdv = new QDateTimeEdit{};
+    d_dateFinAjtRdv->setDisplayFormat("dd/MM/yyyy/hh/mm");
+    d_dateFinAjtRdv->setDateTime(QDateTime::currentDateTime());
+    mainLayout->addWidget(d_dateFinAjtRdv,7,0,Qt::AlignLeft);
     d_dateFinErrorAjtRdv = new QLabel{"                 "};
     d_dateFinErrorAjtRdv->setStyleSheet("color : red");
-    mainLayout->addWidget(d_dateFinErrorAjtRdv,9,0);
+    mainLayout->addWidget(d_dateFinErrorAjtRdv,8,0);
+    d_btnAjtRdv = new QPushButton{tr("Ajouter")};
+    mainLayout->addWidget(d_btnAjtRdv,9,0,Qt::AlignLeft);
+    connect(d_btnAjtRdv,&QPushButton::clicked,
+            this,&fenetreRDV::onAjouterRdv);
 
     //Personnes
     mainLayout->addWidget(new QLabel{tr("Personnes:")},10,0,Qt::AlignLeft);
     d_affichePersAjtRdv = new QComboBox{};
     mainLayout->addWidget(d_affichePersAjtRdv,11,0,Qt::AlignLeft);
-    auto btnAjouterPers=new QPushButton{tr("Ajouter")};
-    mainLayout->addWidget(btnAjouterPers,11,1,Qt::AlignLeft);
-    connect(btnAjouterPers,&QPushButton::clicked,
+    connect(d_affichePersAjtRdv,&QComboBox::activated,
             this,&fenetreRDV::onAjouterPersRdv);
+    d_affichePersAjtRdv->setDisabled(true);
+    d_infoAjtPersRdv = new QLabel{"     "};
+    mainLayout->addWidget(d_infoAjtPersRdv,12,0,Qt::AlignLeft);
+
+
+
+
 
 
     central->setLayout(mainLayout);
@@ -606,18 +628,447 @@ void fenetreRDV::vueRdvAjouter()
 
 void fenetreRDV::afficherPersSelectionAjtRdv()
 {
-    for(int i=0 ; i<d_personnes.taille() ; ++i)
-    {
-        //c'est mieux d'ajouter un iterateur pour la liste des personnes
-        d_affichePersAjtRdv->addItem(QString::fromStdString(d_personnes.get_personne(i).nom()));
-    }
+//    if(d_nomTextAjtRdv->text() != "")
+//    {
+
+        for(int i=0 ; i<d_personnes.taille() ; ++i)
+        {
+            //c'est mieux d'ajouter un iterateur pour la liste des personnes
+            //et il  faut afficher que les personnes ajoutable
+            d_affichePersAjtRdv->addItem(QString::fromStdString(d_personnes.get_personne(i).nom()));
+        }
+//    }
 }
 void fenetreRDV::onActionAjouterRdv()
 {
     vueRdvAjouter();
     afficherPersSelectionAjtRdv();
 }
-void fenetreRDV::onAjouterPersRdv()
+
+void fenetreRDV::onAjouterRdv()
 {
-    d_affichePersAjtRdv->removeItem(0);
+
+    validation v;
+    bool valide{true};
+    if(!v.isNom(d_nomTextAjtRdv->text().toStdString()))
+    {
+        d_nomErrorAjtRdv->setText(tr("Entrer un nom valide"));
+        valide=false;
+    }
+    else
+    {
+        d_nomErrorAjtRdv->setText("");
+    }
+    if(!v.estRdv(d_dateDebAjtRdv->text().toStdString(),d_dateFinAjtRdv->text().toStdString()))
+    {
+        d_dateFinErrorAjtRdv->setText(tr("Entrer des dates valide"));
+        valide=false;
+    }
+    else
+    {
+        d_dateFinErrorAjtRdv->setText("");
+    }
+    if(valide)
+    {
+        d_dateFinErrorAjtRdv->setStyleSheet("color : green");
+        d_dateFinErrorAjtRdv->setText("Rdv ajoute");
+        d_rdvs.ajouter(d_nomTextAjtRdv->text().toStdString(),d_dateDebAjtRdv->text().toStdString(),d_dateFinAjtRdv->text().toStdString());
+        d_btnAjtRdv->hide();
+        d_affichePersAjtRdv->setEnabled(true);
+    }
 }
+
+void fenetreRDV::onAjouterPersRdv(int idx)
+{
+    Personne P{d_personnes.personne(d_affichePersAjtRdv->itemText(idx).toStdString())};
+    if(d_rdvs.rdv(d_nomTextAjtRdv->text().toStdString()).ajouter_pers(P,d_rdvs.rdvs_personne(P)))
+    {
+        d_infoAjtPersRdv->setStyleSheet("color : green");
+        d_infoAjtPersRdv->setText(tr("Personne ajoutee"));
+        d_affichePersAjtRdv->removeItem(idx);
+
+    }
+    else
+    {
+        d_infoAjtPersRdv->setStyleSheet("color : red");
+        d_infoAjtPersRdv->setText(tr("Personne n'est pas ajoutee"));
+    }
+}
+
+
+void fenetreRDV::vueRdvModifier()
+{
+    auto central = new QWidget{};
+
+    auto mainLayout = new QGridLayout{};
+    mainLayout->addWidget(new QLabel{tr("Modifier un Rdv")},0,1, Qt::AlignCenter);
+
+    //Bar de recherche
+    mainLayout->addWidget(new QLabel{tr("Entrer le nom : ")},1,0,Qt::AlignLeft);
+    //Line Edit
+    d_nomRechModifierRdv=new QLineEdit{};
+    mainLayout->addWidget(d_nomRechModifierRdv,1,1,Qt::AlignLeft);
+    auto btnRechModifierRdv = new QPushButton{tr("Rechercher")};
+    mainLayout->addWidget(btnRechModifierRdv,1,2,Qt::AlignLeft);
+    connect(btnRechModifierRdv,&QPushButton::clicked,
+            this,&fenetreRDV::onRechModifierRdv);
+    //ecrire l'erreure
+    d_nomErrRechModifierRdv = new QLabel{"     "};
+    d_nomErrRechModifierRdv->setStyleSheet("color : red");
+    mainLayout->addWidget(d_nomErrRechModifierRdv,2,0,Qt::AlignLeft);
+
+    //nom
+    mainLayout->addWidget(new QLabel{tr("Nom*")},3,0,Qt::AlignLeft);
+    d_nomModifierRdv = new QLineEdit{};
+    mainLayout->addWidget(d_nomModifierRdv,4,0,Qt::AlignJustify);
+    d_nomErrModifierRdv = new QLabel{"                 "};
+    d_nomErrModifierRdv->setStyleSheet("color : red");
+    mainLayout->addWidget(d_nomErrModifierRdv,5,0);
+
+    //date Deb
+    mainLayout->addWidget(new QLabel{tr("Date Debut:")},6,0,Qt::AlignLeft);
+    d_dateDebModifierRdv = new QDateTimeEdit{};
+    d_dateDebModifierRdv->setDisplayFormat("dd/MM/yyyy/hh/mm");
+    d_dateDebModifierRdv->setDateTime(QDateTime::currentDateTime());
+    mainLayout->addWidget(d_dateDebModifierRdv,7,0,Qt::AlignLeft);
+
+    //Date fin
+    mainLayout->addWidget(new QLabel{tr("Date Fin:")},8,0,Qt::AlignLeft);
+    d_dateFinModifierRdv = new QDateTimeEdit{};
+    d_dateFinModifierRdv->setDisplayFormat("dd/MM/yyyy/hh/mm");
+    d_dateFinModifierRdv->setDateTime(QDateTime::currentDateTime());
+    mainLayout->addWidget(d_dateFinModifierRdv,9,0,Qt::AlignLeft);
+    //error dates
+    d_dateFinErrModifierRdv = new QLabel{"       "};
+    d_dateFinErrModifierRdv->setStyleSheet("color  : red");
+    mainLayout->addWidget(d_dateFinErrModifierRdv,10,0,Qt::AlignLeft);
+    auto btnModifRdv = new QPushButton{tr("Modifier")};
+    mainLayout->addWidget(btnModifRdv,11,0,Qt::AlignLeft);
+    connect(btnModifRdv,&QPushButton::clicked,
+            this,&fenetreRDV::onModiferRdv);
+
+    //Supprimer Pers
+    mainLayout->addWidget(new QLabel{tr("Supprimer Personnes:")},12,0,Qt::AlignLeft);
+    d_afficheSuppPersModifierRdv = new QComboBox{};
+    d_afficheSuppPersModifierRdv->setDisabled(true);
+    mainLayout->addWidget(d_afficheSuppPersModifierRdv,13,0,Qt::AlignLeft);
+    connect(d_afficheSuppPersModifierRdv,&QComboBox::activated,
+            this,&fenetreRDV::onSuppPersModifRdv);
+    d_ErrSuppPersModifierRdv = new QLabel{"    "};
+    d_ErrSuppPersModifierRdv->setStyleSheet("color : red");
+    mainLayout->addWidget(d_ErrSuppPersModifierRdv,14,0,Qt::AlignLeft);
+
+    //Ajouter Pers
+    mainLayout->addWidget(new QLabel{tr("Ajouter Personnes:")},15,0,Qt::AlignLeft);
+    d_afficheAjtPersModifierRdv = new QComboBox{};
+    d_afficheAjtPersModifierRdv->setDisabled(true);
+    mainLayout->addWidget(d_afficheAjtPersModifierRdv,16,0,Qt::AlignLeft);
+    connect(d_afficheAjtPersModifierRdv,&QComboBox::activated,
+            this,&fenetreRDV::onAjtPersModifRdv);
+    d_ErrAjtPersModifierRdv = new QLabel{"    "};
+    d_ErrAjtPersModifierRdv->setStyleSheet("color : red");
+    mainLayout->addWidget(d_ErrAjtPersModifierRdv,17,0,Qt::AlignLeft);
+
+
+
+
+
+    central->setLayout(mainLayout);
+    setCentralWidget(central);
+    this->adjustSize();
+}
+void fenetreRDV::afficherPersSelectionSuppModifRdv()
+{
+    d_afficheSuppPersModifierRdv->clear();
+    vector<Personne> pers{d_rdvs.rdv(d_nomModifierRdv->text().toStdString()).personnes()};
+    for(const auto& p : pers)
+        d_afficheSuppPersModifierRdv->addItem(QString::fromStdString(p.nom()));
+}
+void fenetreRDV::afficherPersSelectionAjtModifRdv()
+{
+    d_afficheAjtPersModifierRdv->clear();
+    Rdv rdv{d_rdvs.rdv(d_nomModifierRdv->text().toStdString())};
+    for(int i{0} ; i<d_personnes.taille() ; ++i)
+    {
+        Personne pers=d_personnes.get_personne(i);
+//        if(rdv.pers_ajoutable(d_rdvs.rdvs_personne(pers.nom())))
+            d_afficheAjtPersModifierRdv->addItem(QString::fromStdString(pers.nom()));
+    }
+}
+void fenetreRDV::onActionModifierRdv()
+{
+    vueRdvModifier();
+}
+void fenetreRDV::onRechModifierRdv()
+{
+    if(-1==d_rdvs.rechercher(d_nomRechModifierRdv->text().toStdString()))
+    {
+        d_nomErrRechModifierRdv->setText(tr("Ce nom n'existe pas"));
+    }
+    else
+    {
+        Rdv rdv{d_rdvs.rdv(d_nomRechModifierRdv->text().toStdString())};
+        d_nomErrRechModifierRdv->setText("");
+        d_nomModifierRdv->setText(QString::fromStdString(rdv.nom()));
+        d_dateFinModifierRdv->setDisplayFormat("dd/MM/yyyy/hh/mm");
+        QDateTime date_deb{QDate{rdv.date_deb().jour(),rdv.date_deb().mois(), rdv.date_deb().annee()}, QTime{rdv.date_deb().heure(), rdv.date_deb().minute()}};
+        d_dateDebModifierRdv->setDateTime(date_deb);
+//        d_dateDebModifierRdv->setCalendarPopup(true);
+    }
+//    d_dateFinErrModifierRdv
+
+}
+void fenetreRDV::onModiferRdv()
+{
+    validation v;
+    bool valide{true};
+    if(!v.isNom(d_nomModifierRdv->text().toStdString()))
+    {
+        d_nomErrModifierRdv->setText(tr("Entrer un nom valide"));
+        valide=false;
+    }
+    else
+    {
+        d_nomErrModifierRdv->setText("");
+
+    }
+    if(!v.estRdv(d_dateDebModifierRdv->text().toStdString(),d_dateFinModifierRdv->text().toStdString()))
+    {
+        d_dateFinErrModifierRdv->setText(tr("Entrer des dates valides"));
+        valide=false;
+    }
+    else
+    {
+        d_dateFinErrModifierRdv->setText("");
+    }
+    if(valide)
+    {
+        if(d_rdvs.modifier(d_nomRechModifierRdv->text().toStdString(),d_nomModifierRdv->text().toStdString(),d_dateDebModifierRdv->text().toStdString(),d_dateFinModifierRdv->text().toStdString(),d_rdvs.rdv(d_nomRechModifierRdv->text().toStdString()).personnes()))
+        {
+            d_afficheAjtPersModifierRdv->setEnabled(true);
+            d_afficheSuppPersModifierRdv->setEnabled(true);
+            afficherPersSelectionSuppModifRdv();
+            afficherPersSelectionAjtModifRdv();
+        }
+        else
+        {
+            d_dateFinErrModifierRdv->setText("Rdv non Modifier");
+        }
+    }
+
+}
+void fenetreRDV::onSuppPersModifRdv(int idx)
+{
+    Personne pers{d_personnes.get_personne(d_afficheSuppPersModifierRdv->itemText(idx).toStdString())};
+    if(d_rdvs.rdv(d_nomModifierRdv->text().toStdString()).supprimer_pers(pers))
+    {
+        d_afficheSuppPersModifierRdv->removeItem(idx);
+        d_ErrSuppPersModifierRdv->setText(tr("Personne Supprimer"));
+        afficherPersSelectionAjtModifRdv();
+    }
+    else
+    {
+        d_ErrSuppPersModifierRdv->setText(tr(""));
+    }
+
+}
+void fenetreRDV::onAjtPersModifRdv(int idx)
+{
+    Personne pers{d_personnes.get_personne(d_afficheAjtPersModifierRdv->itemText(idx).toStdString())};
+    if(d_rdvs.rdv(d_nomModifierRdv->text().toStdString()).ajouter_pers(pers,d_rdvs.rdvs_personne(pers)))
+    {
+        d_afficheSuppPersModifierRdv->addItem(d_afficheAjtPersModifierRdv->itemText(idx));
+        d_afficheAjtPersModifierRdv->removeItem(idx);
+        d_ErrAjtPersModifierRdv->setText(tr("Personne Ajouter"));
+    }
+    else
+    {
+        d_ErrAjtPersModifierRdv->setText(tr("Personne non Ajoutable"));
+    }
+}
+
+
+
+//vue Supprimer rdv
+void fenetreRDV::vueSupprimerRdv()
+{
+    auto central = new QWidget{};
+
+    auto mainLayout = new QGridLayout{central};
+
+    mainLayout->addWidget(new QLabel{tr("Supprimer Rendez-vous")},0,1,Qt::AlignLeft);
+    mainLayout->addWidget(new QLabel{tr("Nom")},1,0,Qt::AlignLeft);
+    d_nomSuppRdv = new QLineEdit{};
+    mainLayout->addWidget(d_nomSuppRdv,1,1,Qt::AlignLeft);
+    auto btnSupp = new QPushButton{tr("Supprimer")};
+    mainLayout->addWidget(btnSupp,1,3,Qt::AlignLeft);
+    connect(btnSupp,&QPushButton::clicked,
+            this,&fenetreRDV::onSupprimerRdv);
+
+    d_nomErrSuppRdv = new QLabel{"     "};
+    mainLayout->addWidget(d_nomErrSuppRdv,2,1,Qt::AlignLeft);
+
+
+    setCentralWidget(central);
+}
+
+void fenetreRDV::onSupprimerRdv()
+{
+    if(d_rdvs.supprimer(d_nomSuppRdv->text().toStdString()))
+    {
+        d_nomErrSuppRdv->setStyleSheet("color : green");
+        d_nomErrSuppRdv->setText(tr("Rendez-vous Supprimer"));
+    }
+    else
+    {
+        d_nomErrSuppRdv->setStyleSheet("color : red");
+        d_nomErrSuppRdv->setText(tr("Ce nom n'existe pas"));
+    }
+}
+void fenetreRDV::onActionSupprimerRdv()
+{
+    vueSupprimerRdv();
+}
+void fenetreRDV::onActionRechercherRdvDate()
+{
+    vueRechercherRdvDate();
+    afficheRdv();
+}
+void fenetreRDV::vueRechercherRdvDate()
+{
+    auto central = new QWidget{};
+
+    auto mainLayout = new QGridLayout{central};
+    mainLayout->addWidget(new QLabel{tr("Recherche rendez-vous")},0,0,Qt::AlignCenter);
+
+    d_calendar = new QCalendarWidget{};
+    d_calendar->setMinimumSize(400,500);
+    connect(d_calendar,&QCalendarWidget::clicked,
+            this,&fenetreRDV::onDayCalendarClick);
+    mainLayout->addWidget(d_calendar,1,0,Qt::AlignCenter);
+
+
+    setCentralWidget(central);
+}
+void fenetreRDV::afficheRdv()
+{
+    QTextCharFormat textf =QTextCharFormat();
+//    QGradient color = QGradient();
+    QColor color = QColor("green");
+    textf.setBackground(QBrush(color));
+    for(int i=0 ; i<d_rdvs.taille() ; ++i)
+    {
+        Date date_deb=d_rdvs.rdv(i).date_deb();
+
+        d_calendar->setDateTextFormat({ date_deb.annee(),date_deb.mois(),date_deb.jour()},textf);
+    }
+}
+void fenetreRDV::vueRechercherRdvNom()
+{
+    auto central = new QWidget{};
+
+    auto mainLayout = new QGridLayout{central};
+    mainLayout->addWidget(new QLabel{tr("Recherche rendez-vous")},0,1,Qt::AlignLeft);
+
+    auto rechLayout = new QVBoxLayout{};
+    rechLayout->addWidget(new QLabel{tr("Nom:")});
+    auto linRech = new QHBoxLayout{};
+    d_nomRechRdvNom = new QLineEdit{};
+    linRech->addWidget(d_nomRechRdvNom);
+    auto btnRech = new QPushButton{tr("Rechercher")};
+    linRech->addWidget(btnRech);
+    connect(btnRech,&QPushButton::clicked,
+            this,&fenetreRDV::onRechercherRdvNom);
+    rechLayout->addLayout(linRech);
+    d_infoRechRdvNom = new QLabel{"       "};
+    rechLayout->addWidget(d_infoRechRdvNom);
+    rechLayout->addStretch(1);
+
+    mainLayout->addLayout(rechLayout,1,0);
+    d_calendar = new QCalendarWidget{};
+    d_calendar->setMinimumSize(400,500);
+    mainLayout->addWidget(d_calendar,1,1,Qt::AlignCenter);
+
+
+    setCentralWidget(central);
+}
+void fenetreRDV::onActionRechercherRdvNom()
+{
+    vueRechercherRdvNom();
+}
+
+void fenetreRDV::onRechercherRdvNom()
+{
+    if(d_personnes.recherche(d_nomRechRdvNom->text().toStdString())<0)
+    {
+        d_infoRechRdvNom->setText(tr("Cette personne n'existe pas"));
+    }
+    else
+    {
+        vector<Rdv> list_rdvs{d_rdvs.rdvs_personne(d_nomRechRdvNom->text().toStdString())};
+        if(list_rdvs.size()==0)
+        {
+            d_infoRechRdvNom->setText(tr("Cette personne n'a pas de rdvs"));
+        }
+        else
+        {
+            afficheRdvPers(list_rdvs);
+            d_infoRechRdvNom->setText(tr(""));
+//            connect(d_calendar,&QCalendarWidget::clicked,
+//                    this,&fenetreRDV::onDayCalendarClick);
+        }
+    }
+}
+void fenetreRDV::afficheRdvPers(const vector<Rdv>& list_rdvs)
+{
+    QTextCharFormat textf =QTextCharFormat();
+//    QGradient color = QGradient();
+    QColor color = QColor("Blue");
+    textf.setBackground(QBrush(color));
+    for(int i=0 ; i<list_rdvs.size() ; ++i)
+    {
+        Date date_deb=list_rdvs[i].date_deb();
+
+        d_calendar->setDateTextFormat({ date_deb.annee(),date_deb.mois(),date_deb.jour()},textf);
+    }
+}
+
+void fenetreRDV::onDayCalendarClick(QDate date)
+{
+    vector<Rdv> rdvs=d_rdvs.rdvsDeDate({date.day(),date.month(),date.year(),1,1});
+    if(rdvs.size()==0)
+    {
+        QMessageBox msgBox{QMessageBox::Information,
+        tr("Information"), tr("Il n'existe pas de rdv pour aujourd'hui!!")};
+        msgBox.exec();
+    }
+    else
+    {
+        QDialog dialog{this};
+        auto dialogLayout = new QGridLayout{};
+        int i{0};
+
+        dialogLayout->addWidget(new QLabel{tr("Rendez-vous d'aujourd'hui")},i++,0,Qt::AlignCenter);
+
+        for(const auto& rdv : rdvs)
+        {
+            //Nom
+            dialogLayout->addWidget(new QLabel{tr("Nom :")},i,0);
+            dialogLayout->addWidget(new QLabel{QString::fromStdString(rdv.nom())},i++,1);
+            //Personne
+            vector<Personne> personnes=rdv.personnes();
+            dialogLayout->addWidget(new QLabel{"Personnes: "+QString::number(rdv.nbr_pers())},i++,0);
+            for(unsigned j{0} ; j<personnes.size() ; ++j)
+            {
+                dialogLayout->addWidget(new QLabel{QString::fromStdString(personnes[j].nom())},i,0);
+                dialogLayout->addWidget(new QLabel{QString::fromStdString(personnes[j].prenom())},i,1);
+                dialogLayout->addWidget(new QLabel{QString::fromStdString(personnes[j].tel())},i,2);
+                dialogLayout->addWidget(new QLabel{QString::fromStdString(personnes[j].email())},i++,3);
+            }
+        }
+        dialog.setLayout(dialogLayout);
+        dialog.exec();
+    }
+
+}
+

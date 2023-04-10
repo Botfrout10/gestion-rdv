@@ -25,6 +25,7 @@ public:
     unsigned annee() const;
     unsigned heure() const;
     unsigned minute() const;
+    std::string dateStr() const;
     void ecrire(std::ostream& ost) const;
     bool lire(std::istream& ist);
     friend std::ostream& operator<<(std::ostream& ost,const Date& date);

@@ -194,19 +194,18 @@ void RdvLCH::supprimer_fin()
 }
 
 
-void RdvLCH::supprimer(const string &nom)
+bool RdvLCH::supprimer(const string &nom)
 {
 
     std::string nom_modif{nom};
     en_maj(nom_modif);
     if(vide())
-        return;
-    RdvCH*crt{d_tete};
+        return false;
+    RdvCH *crt{d_tete};
     while(crt!=nullptr && crt->d_rdv.nom()!=nom_modif)
         crt=crt->d_suiv;
     if(crt==nullptr)
-        return;
-    //si la personne n'a acun rdv
+        return false;
     if(crt==d_tete)
     {
         supprimer_entete();
@@ -221,20 +220,21 @@ void RdvLCH::supprimer(const string &nom)
     }
     delete crt;
     d_taille--;
+    return true;
 }
-void RdvLCH::modifier(const std::string& nom_p,const std::string& nom,const Date& date_deb,const Date& date_fin,const std::vector<Personne> &personnes)
+bool RdvLCH::modifier(const std::string& nom_p,const std::string& nom,const Date& date_deb,const Date& date_fin,const std::vector<Personne> &personnes)
 {
     std::string nom_modif{nom};
     en_maj(nom_modif);
     std::string nomp_modif{nom_p};
     en_maj(nomp_modif);
-    if(!vide() && rechercher(nom_modif)<0)
+    if(!vide())
     {
         RdvCH *crt{d_tete};
         while(crt!=nullptr && nomp_modif!=crt->d_rdv.nom())
             crt=crt->d_suiv;
         if(crt==nullptr)
-            return;
+            return false;
         else
         {
             crt->d_rdv.set_rdv(nom_modif,date_deb,date_fin,personnes);
@@ -246,8 +246,12 @@ void RdvLCH::modifier(const std::string& nom_p,const std::string& nom,const Date
                 RdvCH *rdv{new RdvCH{nom_modif,date_deb,date_fin,personnes}};
                 ajouter(rdv);
             }
+            return true;
         }
+        return true;
     }
+    else
+        return false;
 }
 
 void RdvLCH::rdvs_personne(const Personne& pers,std::vector<Rdv>& list_rdvs) const
@@ -338,7 +342,6 @@ Rdv& RdvLCH::rdv(int idx) const
     if(crt==nullptr)
         throw std::runtime_error("Il n'existe pas un rdv avec tel indice");
     return crt->d_rdv;
-
 }
 
 Rdv& RdvLCH::rdv(const std::string& nom) const
@@ -377,7 +380,7 @@ vector<Rdv> RdvLCH::rdvsDeDate(const Date& date) const
     RdvCH* crt{d_tete};
     while(crt!=nullptr)
     {
-        if( date==crt->d_rdv.date_deb() )
+        if( date.annee()==crt->d_rdv.date_deb().annee() && date.mois()==crt->d_rdv.date_deb().mois() && date.jour()==crt->d_rdv.date_deb().jour() )
             res.push_back(crt->d_rdv);
         crt=crt->d_suiv;
     }
